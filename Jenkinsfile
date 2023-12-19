@@ -49,7 +49,7 @@ pipeline {
         stage("Trivy Scan") {
             steps {
                 script {
-                    sh 'docker run -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image suyog9350/register-app-pipeline:latest --no-progress --scanners vuln --exit-code 0 --severity'
+                    sh 'docker run -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image suyog9350/register-app-pipeline:latest --no-progress --scanners vuln --exit-code 0 --severity HIGH,CRITICAL'
                 }
             }
         }
@@ -58,15 +58,6 @@ pipeline {
                 script {
                     sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG}"
                     sh "docker rmi ${IMAGE_NAME}:latest"
-                }
-            }
-        }
-
-        stage("Trigger CD Pipeline") {
-            steps {
-                script {
-                    def token = env.JENKINS_API_TOKEN ?: "your_default_token_here"
-                    sh "curl -v -k --user clouduser:${token} -X POST -H 'cache-control: no-cache' -H 'content-type: application/x-www-form-urlencoded' --data 'IMAGE_TAG=${IMAGE_TAG}' 'ec2-18-236-131-189.us-west-2.compute.amazonaws.com'"
                 }
             }
         }
